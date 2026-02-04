@@ -2,7 +2,7 @@
 
 This repository provides a **PCL/C++ implementation of GLnR (Generalized Linear *n*-Dimensional Rigid Registration)** from:
 
-- **Jin Wu et al.** “Generalized n-Dimensional Rigid Registration: Theory and Applications”, *IEEE Transactions on Cybernetics*, 2023.
+- **Jin Wu, Xiangcheng Hu, et al.** “Generalized n-Dimensional Rigid Registration: Theory and Applications”, *IEEE Transactions on Cybernetics*, 2023.
 
 The paper derives a **closed-form linear least-squares** solution for rigid registration in *n* dimensions using the **Cayley rotation parameterization**.
 This project adapts the core idea to practical point-cloud alignment by implementing the **3D specialization** and wrapping it in an **ICP-style loop** (nearest-neighbor correspondences + optional RANSAC rejection).
@@ -198,7 +198,7 @@ $ p_{target} \approx T \cdot p_{source} $
 ./glnr_register --source ../data/bun000.ply --target ../data/bun045.ply --output aligned.pcd --transform transform.txt --visualize
 ```
 Sample Output:
-
+![Fig3](docs/paper_figures/registration.png)
 
 
 ---
