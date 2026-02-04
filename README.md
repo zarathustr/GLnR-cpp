@@ -1,10 +1,10 @@
-# GLnR point-cloud registration (PCL / C++)
+# GLnR Point-Cloud Registration with Covariance (PCL / C++)
 
-This repository provides a **PCL/C++ implementation of GLnR (Generalized Linear *n*-Dimensional Rigid Registration)** from:
+This repository provides a **PCL/C++ implementation of GLnR (Generalized Linear *n*-Dimensional Rigid Registration)** with Analytical Covariance from:
 
 - **Jin Wu, Xiangcheng Hu, et al.** “Generalized n-Dimensional Rigid Registration: Theory and Applications”, *IEEE Transactions on Cybernetics*, 2023.
 
-The paper derives a **closed-form linear least-squares** solution for rigid registration in *n* dimensions using the **Cayley rotation parameterization**.
+The paper derives a **closed-form linear least-squares** solution for rigid registration and its covariance in *n* dimensions using the **Cayley rotation parameterization**.
 This project adapts the core idea to practical point-cloud alignment by implementing the **3D specialization** and wrapping it in an **ICP-style loop** (nearest-neighbor correspondences + optional RANSAC rejection).
 
 ---
@@ -12,6 +12,7 @@ This project adapts the core idea to practical point-cloud alignment by implemen
 ## Features
 
 - **GLnR closed-form update step** (3D, SO(3) + translation)
+- **GLnR closed-form covariance estimator**
 - ICP-like outer loop (NN correspondences) with:
   - max correspondence distance gate
   - optional RANSAC correspondence rejection
@@ -198,7 +199,7 @@ $ p_{target} \approx T \cdot p_{source} $
 ./glnr_register --source ../data/bun000.ply --target ../data/bun045.ply --output aligned.pcd --transform transform.txt --visualize
 ```
 Sample Output:
-![Fig3](docs/paper_figures/registration.png)
+![Fig7](docs/paper_figures/registration.png)
 
 Red: Original Point Cloud
 
@@ -208,7 +209,44 @@ Blue: Registered Original Point Cloud to the Target
 
 ---
 
-## 6) Repository layout
+## 6) Covariance Estimation
+
+### Ground-truth covariance validation (Monte-Carlo, fixed correspondences)
+
+This repo provides **two** fixed-correspondence (index-aligned) statistical tools:
+
+1) **`glnr_monte_carlo_cov` (recommended)**
+
+- Generates a synthetic source cloud, a random ground-truth transform, and a noise-free target cloud.
+- Repeats GLnR registration under different Gaussian noise realizations.
+- Computes **empirical (Monte-Carlo) covariance** of the estimated transform.
+- Computes the **theoretical covariance** from the paper (Section II‑E, Eq. (32)–(41)).
+- Writes both to CSV so you can plot / compare.
+
+```bash
+./glnr_monte_carlo_cov \
+  --num_points 5000 \
+  --trials 500 \
+  --sigma_tgt 0.01 \
+  --sigma_src 0.0 \
+  --output_prefix glnr_mc
+
+# Plot the 6x6 upper-triangular covariance heatmap
+python3 ../tools/plot_cov_uppertri.py --prefix glnr_mc
+```
+
+2) **`glnr_fixed_corr_stats` (file-driven)**
+
+This older tool uses **input clouds** (and an optional user-provided ground-truth matrix) and runs
+the same “fixed-correspondence” GLnR estimate repeatedly with re-sampled noise.
+
+## Sample Covariance Output
+
+![Fig8](docs/paper_figures/cov.png)
+
+---
+
+## 7) Repository layout
 
 ```
 .
@@ -220,17 +258,10 @@ Blue: Registered Original Point Cloud to the Target
 
 ---
 
-## 7) Limitations & next steps
+## 8) Limitations & next steps
 
 - This repo implements the **3D** case (SO(3)+t). The paper supports general *n*.
-- The paper derives **covariances** for rotation/translation; this repo currently outputs only the transform.
 - Cayley parameterization is not ideal for near-180° updates; for very large initial misalignment, you may need a coarse alignment step first.
-
-Possible extensions:
-
-- Add covariance output (propagate based on the paper’s closed-form covariance expressions).
-- Expose an initial guess (`--init_transform`) and/or integrate a global coarse matcher.
-- Implement the general `SO(n)` solver (useful for hand–eye calibration and SE(n)→SO(n+1) embeddings described in the paper).
 
 ---
 
