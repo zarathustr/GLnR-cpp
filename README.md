@@ -201,7 +201,9 @@ Sample Output:
 ![Fig3](docs/paper_figures/registration.png)
 
 Red: Original Point Cloud
+
 Green: Target Point Cloud
+
 Blue: Registered Original Point Cloud to the Target
 
 ---
