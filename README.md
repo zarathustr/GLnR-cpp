@@ -38,8 +38,8 @@ where `G` is skew-symmetric.
 
 After removing translation by centering both sets:
 
-- \(\tilde b_i = b_i - \bar b\), \(\tilde r_i = r_i - \bar r\)
-- \(x_i = \tilde b_i + \tilde r_i\), \(d_i = \tilde r_i - \tilde b_i\)
+- $\tilde b_i = b_i - \bar b$, $\tilde r_i = r_i - \bar r$
+- $x_i = \tilde b_i + \tilde r_i$, $d_i = \tilde r_i - \tilde b_i$
 
 the problem becomes a linear least-squares over a minimal parameter vector `g` describing `G`:
 
